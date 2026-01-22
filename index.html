@@ -4,6 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>核函搜尋工具</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --bg1:#050814;
@@ -25,7 +29,86 @@
 
       --r:18px;
     }
+/* ===== Readability upgrade (append-only) ===== */
 
+/* 1) 全站字體與字級：更清楚、更穩 */
+body{
+  font-family: "Noto Sans TC", ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  letter-spacing: .2px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 2) 標題/次標：層級更明確 */
+.brand h1{ font-size: 30px; }
+.sub{ font-size: 15px; line-height: 1.7; }
+.hd .title{ font-size: 16.5px; }
+.mini{ font-size: 13.5px; }
+
+/* 3) 表單與按鈕：字更清楚、focus 更好辨識 */
+input[type="text"], input[type="date"], button{
+  font-size: 15.5px;
+}
+input[type="text"]:focus, input[type="date"]:focus{
+  box-shadow: 0 0 0 7px rgba(96,165,250,.16);
+}
+button:focus-visible, .tab:focus-visible, #dropzone:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 7px rgba(96,165,250,.18);
+}
+
+/* 4) 表格：更好讀（字級+行距+欄位視覺穩定） */
+th, td{
+  font-size: 15px;
+  line-height: 1.55;
+}
+th{ letter-spacing: .25px; }
+
+/* 5) 核函號碼/列號：等寬字 + 數字更好辨識 */
+.mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+td.num, th.num{
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+td.code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .3px;
+}
+
+/* 6) 狀態膠囊：字更清晰、對齊更好 */
+.statusPill{
+  font-size: 13.5px;
+  padding: 5px 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* 7) 表格橫向滾動：更好操作 */
+.tableWrap{
+  scrollbar-gutter: stable;
+}
+.tableWrap::-webkit-scrollbar{ height: 10px; width: 10px; }
+.tableWrap::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.16);
+  border-radius: 999px;
+}
+.tableWrap::-webkit-scrollbar-thumb:hover{
+  background: rgba(255,255,255,.22);
+}
+
+/* 8) 無障礙：使用者若偏好減少動態，關掉 hover 位移 */
+@media (prefers-reduced-motion: reduce){
+  *{ transition: none !important; }
+  button:hover, .tab:hover, .dropzone:hover{ transform:none !important; }
+}
+
+    
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -767,3 +850,4 @@
   </script>
 </body>
 </html>
+
