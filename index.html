@@ -8,8 +8,6 @@
     :root{
       --bg:#0b1020;
       --panel:#0f172a;
-      --card:#0b1226;
-      --card2:#0a1533;
       --text:#e5e7eb;
       --muted:#94a3b8;
       --line:rgba(148,163,184,.18);
@@ -17,8 +15,6 @@
       --accent2:#a78bfa;
       --ok:#34d399;
       --bad:#fb7185;
-      --warn:#fbbf24;
-      --shadow: 0 12px 30px rgba(0,0,0,.22);
       --shadow2: 0 8px 18px rgba(0,0,0,.18);
       --radius:16px;
     }
@@ -95,9 +91,6 @@
       display:flex;align-items:center;justify-content:center;
       border:1px solid rgba(96,165,250,.25)
     }
-    .dz-ico svg{opacity:.95}
-    .dz-main b{font-size:14px}
-    .dz-file{margin-top:6px;color:var(--muted);font-size:13px}
 
     /* Controls */
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
@@ -136,7 +129,6 @@
       color: #081028;
       font-weight: 700;
     }
-    .primary:hover{ filter: brightness(1.02); }
     .ghost{
       background: transparent;
       border:1px solid rgba(148,163,184,.25);
@@ -222,7 +214,6 @@
       color: var(--muted); font-size:12px;
     }
     .mini b{color:var(--text)}
-    a{color:inherit}
   </style>
 </head>
 
@@ -230,11 +221,11 @@
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
-        <h1>鎵興｜核函可用清單工具</h1>
-        <div class="sub">純前端運作：Excel 只在瀏覽器解析，不上傳、不留存。</div>
+        <h1>核函可用清單工具</h1>
+        <div class="sub">純前端運作：Excel 只在瀏覽器解析，不上傳、不留存。<span class="muted">作者：彭鼎智</span></div>
       </div>
       <div class="actions">
-        <span class="badge"><span class="dot"></span>正式版 v1.2</span>
+        <span class="badge"><span class="dot"></span>正式版 v1.3</span>
         <span class="badge">本機使用次數：<span id="useCount" class="mono">0</span></span>
         <button id="resetCount" class="ghost">清除計數</button>
       </div>
@@ -259,10 +250,10 @@
                   <path d="M5 15v3a3 3 0 003 3h8a3 3 0 003-3v-3" stroke="rgba(229,231,235,.65)" stroke-width="2" stroke-linecap="round"/>
                 </svg>
               </div>
-              <div class="dz-main">
+              <div>
                 <b>拖曳 Excel 檔案到此</b>
                 <div class="muted">或點擊選擇檔案（支援 .xlsx / .xls）</div>
-                <div id="picked" class="dz-file"></div>
+                <div id="picked" class="muted" style="margin-top:6px"></div>
               </div>
             </div>
           </div>
@@ -348,10 +339,8 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
-    // 欄位（0-based）：J=9, L=11, R=17, T=19
     const COL = { J: 9, L: 11, R: 17, T: 19 };
 
-    // State
     let uploadedFile = null;
     let rows = [];
     let usableRows = [];
@@ -363,7 +352,7 @@
 
     const $ = (id) => document.getElementById(id);
 
-    // ===== 使用次數（僅 localStorage，不上傳）=====
+    // Use count (local only)
     const LS_KEY = "kh_tool_use_count_v1";
     function getUseCount(){ return parseInt(localStorage.getItem(LS_KEY) || "0", 10); }
     function setUseCount(v){ localStorage.setItem(LS_KEY, String(v)); $("useCount").textContent = String(v); }
@@ -371,14 +360,14 @@
     setUseCount(getUseCount());
     $("resetCount").addEventListener("click", ()=> setUseCount(0));
 
-    // ===== 預設今日日期 =====
+    // Init today
     (function initToday(){
       const d = new Date();
       const pad = (n) => String(n).padStart(2,"0");
       $("today").value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
     })();
 
-    // ===== 上傳：點擊＋拖曳 =====
+    // Upload (click + drag)
     const dz = $("dropzone");
     const fileInput = $("fileInput");
 
@@ -407,7 +396,7 @@
       setStatus("已載入檔案，請按「分析」。");
     }
 
-    // ===== 日期解析 =====
+    // Date parsing
     function toDateISO(yyyy, mm, dd){
       const d = new Date(yyyy, mm-1, dd);
       if (Number.isNaN(d.getTime())) return null;
@@ -424,7 +413,6 @@
 
       const digits = s.replace(/\D/g, "");
 
-      // 民國 yyyMMdd（7碼）
       if (digits.length === 7){
         const y = parseInt(digits.slice(0,3),10) + 1911;
         const m = parseInt(digits.slice(3,5),10);
@@ -432,7 +420,6 @@
         return toDateISO(y,m,d);
       }
 
-      // 西元 yyyymmdd（8碼）
       if (digits.length === 8){
         const y = parseInt(digits.slice(0,4),10);
         const m = parseInt(digits.slice(4,6),10);
@@ -440,7 +427,6 @@
         return toDateISO(y,m,d);
       }
 
-      // 114/10/07
       const m = s.match(/^\s*(\d{2,3})\s*\/\s*(\d{1,2})\s*\/\s*(\d{1,2})\s*$/);
       if (m){
         let y = parseInt(m[1],10);
@@ -460,7 +446,7 @@
       return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
     }
 
-    // ===== 規則判斷 =====
+    // Rules
     function isOverdueR(r){
       if (r === null || r === undefined) return false;
       return String(r).includes("逾期");
@@ -481,9 +467,8 @@
       return { status: "不可用", reason: "L欄已到期或無有效日期" };
     }
 
-    // ===== B：自動偵測資料起始列 =====
+    // Auto detect start row
     function looksLikeKhNo(v){
-      // 容錯：至少 6 碼數字；若你們核函固定 10 碼，可改成 === 10
       if (v === null || v === undefined) return false;
       const s = String(v).trim();
       if (!s) return false;
@@ -499,7 +484,7 @@
       return 0;
     }
 
-    // ===== 彙總 =====
+    // Summary
     function buildSummary(usable){
       const map = new Map();
       for (const r of usable){
@@ -511,7 +496,7 @@
         .sort((a,b)=> b.可用筆數 - a.可用筆數 || String(a.核函號碼).localeCompare(String(b.核函號碼)));
     }
 
-    // ===== 表格渲染 =====
+    // Render helpers
     function escapeHtml(s){
       return String(s ?? "")
         .replaceAll("&","&amp;")
@@ -539,15 +524,13 @@
       return `<table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table>`;
     }
 
-    // ===== 搜尋（套用目前分頁）=====
+    // Search
     function applySearch(list){
       const q = $("q").value.trim().toLowerCase();
       if (!q) return list;
       return list.filter(r=>{
-        return [
-          r.khNo, r.khExpire, r.rVal, r.tExpire, r.status, r.reason,
-          r.excelRow
-        ].some(x => String(x ?? "").toLowerCase().includes(q));
+        return [r.khNo, r.khExpire, r.rVal, r.tExpire, r.status, r.reason, r.excelRow]
+          .some(x => String(x ?? "").toLowerCase().includes(q));
       });
     }
 
@@ -593,7 +576,6 @@
       }
 
       if (activeTab === "summary"){
-        // summaryRows 結構是 {核函號碼, 可用筆數}；搜尋沿用 applySearch 需轉形
         const q = $("q").value.trim().toLowerCase();
         let list = summaryRows.map(s=>({ khNo:s.核函號碼, cnt:s.可用筆數 }));
         if (q){
@@ -618,7 +600,7 @@
     // Search
     $("q").addEventListener("input", ()=> render());
 
-    // ===== 分析 =====
+    // Analyze
     $("analyze").addEventListener("click", async ()=>{
       if (!uploadedFile){
         alert("請先拖曳或選擇 Excel 檔案。");
@@ -682,7 +664,7 @@
       render();
     });
 
-    // ===== 下載結果（選用）=====
+    // Download (optional)
     $("download").addEventListener("click", ()=>{
       if (!rows.length) return;
 
