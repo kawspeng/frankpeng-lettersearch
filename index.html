@@ -35,21 +35,23 @@
     *{box-sizing:border-box}
 
     body{
-      margin:0;
-      color:var(--text);
-      font-family: "Noto Sans TC", ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
-      font-size: 16px;
-      line-height: 1.65;
-      letter-spacing: .2px;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+  margin:0;
+  color:var(--text);
+  font-family: "Noto Sans TC", ui-sans-serif, system-ui, -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  letter-spacing: .2px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 
-      background:
-        radial-gradient(1200px 600pxrow at 12% 12%, rgba(96,165,250,.28), transparent 58%),
-        radial-gradient(900px 520px at 82% 5%, rgba(167,139,250,.26), transparent 60%),
-        radial-gradient(900px 520px at 82% 92%, rgba(52,211,153,.14), transparent 62%),
-        linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 45%, #040612 100%);
-    }
+  background-color: #050814; /* 保險：就算漸層失效也不會白底 */
+
+  background:
+    radial-gradient(1200px 600px at 12% 12%, rgba(96,165,250,.28), transparent 58%),
+    radial-gradient(900px 520px at 82% 5%, rgba(167,139,250,.26), transparent 60%),
+    radial-gradient(900px 520px at 82% 92%, rgba(52,211,153,.14), transparent 62%),
+    linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 45%, #040612 100%);
+}
 
     .wrap{max-width:1180px;margin:28px auto 46px;padding:0 18px}
     .topbar{
@@ -865,3 +867,4 @@
   </script>
 </body>
 </html>
+
