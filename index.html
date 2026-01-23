@@ -494,13 +494,44 @@
     }
 
     // ===== 是否真的被使用（含「未使用」則視為仍可用名額）=====
-    function isActuallyUsedByWorker(nameVal){
-      if (nameVal === null || nameVal === undefined) return false;
-      const s = String(nameVal).trim();
-      if (!s) return false;
-      if (s.includes("未使用")) return false; // 例如：未使用3人
-      return true;
-    }
+    function normalizeWorkerName(nameVal){
+  if (nameVal === null || nameVal === undefined) return "";
+  let s = String(nameVal).trim();
+
+  // 空值
+  if (!s) return "";
+
+  // 只要含「未使用」都視為仍可用名額（例如：未使用3人）
+  if (s.includes("未使用")) return "";
+
+  // 常見「非姓名」關鍵字（可依你們檔案再加）
+  const NOT_NAME_KEYWORDS = [
+    "結案","已結案","結清","撤案","作廢","註銷","退件","補件","待補",
+    "逾期","延期","展延","離境","已離境","返國","逃逸","失聯","死亡",
+    "人數","名額","人員","案件","移工","外勞","不明","待確認"
+  ];
+  if (NOT_NAME_KEYWORDS.some(k => s.includes(k))) return "";
+
+  // 含數字通常不是姓名：結案1人、2人、A123…（也排除全形數字）
+  if (/[0-9０-９]/.test(s)) return "";
+
+  // 「X人」這種（避免沒數字但仍是統計字樣）
+  if (s.endsWith("人") && s.length <= 4) return "";
+
+  // 允許的姓名字元：中文 / 英文 / 空白 / 中點 / 連字號
+  // 其他符號太多就當不是姓名
+  if (!/^[\u4e00-\u9fffA-Za-z ·\-]+$/.test(s)) return "";
+
+  // 長度過短或過長（依需求調整）
+  if (s.length < 2 || s.length > 20) return "";
+
+  return s;
+}
+
+function isActuallyUsedByWorker(nameVal){
+  return normalizeWorkerName(nameVal) !== "";
+}
+
 
     // Date parsing
     function toDateISO(yyyy, mm, dd){
@@ -563,24 +594,27 @@
 
     // ✅ 核心判斷：加入「已使用」排除，且 reason 直接帶姓名
     function judgeUsable(L, R, T, today, workerName){
-      if (isActuallyUsedByWorker(workerName)){
-        const who = String(workerName ?? "").trim();
-        return { status: "不可用", reason: `已被移工使用：${who}` };
-      }
+  const who = normalizeWorkerName(workerName);
 
-      if (isOverdueR(R)) return { status: "不可用", reason: "R欄標示逾期" };
+  // ✅ 只有 who 是真的姓名才視為已使用
+  if (who){
+    return { status: "不可用", reason: `已被移工使用：${who}` };
+  }
 
-      const Ld = parseMinguoDate(L);
-      const Td = parseMinguoDate(T);
+  if (isOverdueR(R)) return { status: "不可用", reason: "R欄標示逾期" };
 
-      if (Td){
-        if (dateOnly(Td) >= today) return { status: "可用", reason: "T欄未到期" };
-        return { status: "不可用", reason: "T欄已到期" };
-      }
+  const Ld = parseMinguoDate(L);
+  const Td = parseMinguoDate(T);
 
-      if (Ld && dateOnly(Ld) >= today) return { status: "可用", reason: "L欄未到期" };
-      return { status: "不可用", reason: "L欄已到期或無有效日期" };
-    }
+  if (Td){
+    if (dateOnly(Td) >= today) return { status: "可用", reason: "T欄未到期" };
+    return { status: "不可用", reason: "T欄已到期" };
+  }
+
+  if (Ld && dateOnly(Ld) >= today) return { status: "可用", reason: "L欄未到期" };
+  return { status: "不可用", reason: "L欄已到期或無有效日期" };
+}
+
 
     // Auto detect start row
     function looksLikeKhNo(v){
@@ -672,7 +706,7 @@
       if (activeTab === "unusable"){
         const data = applySearch(unusableRows).map(r=>{
           // ✅ 只要真的已使用，就顯示姓名（不靠 reason 文字判斷）
-          const showName = isActuallyUsedByWorker(r.workerName) ? (r.workerName ?? "") : "";
+          const showName = normalizeWorkerName(r.workerName);
 
           return {
             "狀態": `<span class="statusPill bad">不可用</span>`,
@@ -824,3 +858,4 @@
   </script>
 </body>
 </html>
+
