@@ -324,7 +324,11 @@
           </div>
 
           <div id="status" class="hint">尚未分析</div>
-
+          <div class="hint" style="margin-top:10px; border-color:rgba(251,113,133,.35); background:rgba(251,113,133,.08);">
+  ⚠️ 本工具建議使用新版 Excel（.xlsx）。<br>
+  舊版 Excel（例如 Excel 5.0/95/BIFF）或非標準 .xls 可能無法解析。<br>
+  若解析失敗，請用 Excel 開啟後「另存新檔」為 .xlsx 再匯入。
+</div>
           <div class="hint">
             <strong>判斷規則</strong>：R 含「逾期」→ 不可用；若 T 有日期則以 T 判斷是否到期（優先於 L）；T 無日期則以 L 判斷。<br>
             <strong>新增規則</strong>：若「移工姓名」有值且不含「未使用」→ 視為已被使用，排除於可用清單（並在不可用顯示姓名）。
@@ -447,15 +451,30 @@
     function setPicked(msg){ $("picked").textContent = msg || ""; }
     function setStatus(msg){ $("status").textContent = msg || ""; }
 
-    function setFile(file){
-      if (!file || !file.name.match(/\.(xlsx|xls)$/i)){
-        alert("請選擇 Excel 檔案（.xlsx / .xls）");
-        return;
-      }
-      uploadedFile = file;
-      setPicked(`已選擇：${file.name}`);
-      setStatus("已載入檔案，請按「開始分析」。");
-    }
+    async function setFile(file){
+  if (!file || !file.name.match(/\.(xlsx|xls)$/i)){
+    alert("請選擇 Excel 檔案（.xlsx / .xls）");
+    return;
+  }
+
+  uploadedFile = file;
+  setPicked(`已選擇：${file.name}`);
+
+  // 如果是新版 .xlsx
+  if (/\.(xlsx)$/i.test(file.name)){
+    setStatus("已載入檔案（.xlsx），請按「開始分析」。");
+    return;
+  }
+
+  // 如果是 .xls → 立即提醒
+  setStatus("⚠️ 已載入 .xls（舊版格式可能無法解析）。建議另存為 .xlsx 後再分析。");
+
+  alert(
+    "⚠️ 你選的是 .xls（舊版 Excel 格式）。\n\n" +
+    "若為 Excel 5.0/95/BIFF 活頁簿，瀏覽器端可能無法解析。\n" +
+    "建議用 Excel 開啟後「另存新檔」為 .xlsx 再匯入。"
+  );
+}
 
     // ✅ 讓 UI 先更新（避免看起來「卡住」）
     function yieldToUI(){
@@ -886,4 +905,5 @@
   </script>
 </body>
 </html>
+
 
