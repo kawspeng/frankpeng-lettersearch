@@ -670,10 +670,9 @@
     const TAB = {
       usable: {
         title: "可用清單",
-        cols: ["客戶名稱","狀態","核函號碼(J)","核函到期(L)","入簽/遞補(R)","到期日期(T)","Excel列號","原因"],
+        cols: ["狀態","核函號碼(J)","核函到期(L)","入簽/遞補(R)","到期日期(T)","Excel列號","原因"],
         list: ()=> usableRows,
         make: (r)=>({
-          "客戶名稱": escapeHtml(r.customerName),
           "狀態": `<span class="statusPill ok">可用</span>`,
           "核函號碼(J)": `<span class="code">${escapeHtml(r.khNo)}</span>`,
           "核函到期(L)": escapeHtml(r.khExpire),
@@ -685,10 +684,9 @@
       },
       unusable: {
         title: "不可用",
-        cols: ["客戶名稱","狀態","核函號碼(J)","核函到期(L)","入簽/遞補(R)","移工姓名","到期日期(T)","Excel列號","原因"],
+        cols: ["狀態","核函號碼(J)","核函到期(L)","入簽/遞補(R)","移工姓名","到期日期(T)","Excel列號","原因"],
         list: ()=> unusableRows,
         make: (r)=>({
-          "客戶名稱": escapeHtml(r.customerName),
           "狀態": `<span class="statusPill bad">不可用</span>`,
           "核函號碼(J)": `<span class="code">${escapeHtml(r.khNo)}</span>`,
           "核函到期(L)": escapeHtml(r.khExpire),
@@ -782,13 +780,11 @@
         const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false, defval: null });
 
         const workerNameCol = findColumnIndexByHeader(aoa, "移工姓名");
-        const customerCol = findColumnIndexByHeader(aoa, "客戶名稱");
         const startRowIdx = detectStartRow(aoa);
         lastStartRow = startRowIdx;
 
         rows = [];
 
-        let lastCustomerName = "";
         for (let i = startRowIdx; i < aoa.length; i++){
           const row = aoa[i] || [];
 
@@ -797,12 +793,6 @@
           const R = row[COL.R];
           const T = row[COL.T];
           const workerName = (workerNameCol !== null) ? row[workerNameCol] : null;
-          let customerNameRaw = (customerCol !== null) ? row[customerCol] : "";
-customerNameRaw = String(customerNameRaw ?? "").trim();
-
-// ✅ 若本列空白，就沿用上一列的客戶名稱（處理合併儲存格/只填第一列）
-if (customerNameRaw) lastCustomerName = customerNameRaw;
-const customerName = customerNameRaw || lastCustomerName;
 
           const isAllEmpty = [khNo,L,R,T,workerName].every(v => v === null || v === undefined || String(v).trim() === "");
           if (isAllEmpty) continue;
@@ -822,7 +812,7 @@ const customerName = customerNameRaw || lastCustomerName;
 
           // ✅ precomputed search text
           rowObj.searchBlob = [
-            rowObj.customerName,rowObj.khNo, rowObj.khExpire, rowObj.rVal, rowObj.workerName,
+            rowObj.khNo, rowObj.khExpire, rowObj.rVal, rowObj.workerName,
             rowObj.tExpire, rowObj.status, rowObj.reason, rowObj.excelRow
           ].join("|").toLowerCase();
 
@@ -855,7 +845,6 @@ const customerName = customerNameRaw || lastCustomerName;
     // Download (optional) - remove duplicate mapping
     function toExportRow(r){
       return {
-        "客戶名稱": r.customerName,
         "Excel列號": r.excelRow,
         "核函號碼(J)": r.khNo,
         "核函到期(L)": r.khExpire,
@@ -883,5 +872,3 @@ const customerName = customerNameRaw || lastCustomerName;
   </script>
 </body>
 </html>
-
-
