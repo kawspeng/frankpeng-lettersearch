@@ -788,6 +788,7 @@
 
         rows = [];
 
+        let lastCustomerName = "";
         for (let i = startRowIdx; i < aoa.length; i++){
           const row = aoa[i] || [];
 
@@ -796,7 +797,12 @@
           const R = row[COL.R];
           const T = row[COL.T];
           const workerName = (workerNameCol !== null) ? row[workerNameCol] : null;
-          const customerName = (customerCol !== null) ? row[customerCol] : "";
+          let customerNameRaw = (customerCol !== null) ? row[customerCol] : "";
+customerNameRaw = String(customerNameRaw ?? "").trim();
+
+// ✅ 若本列空白，就沿用上一列的客戶名稱（處理合併儲存格/只填第一列）
+if (customerNameRaw) lastCustomerName = customerNameRaw;
+const customerName = customerNameRaw || lastCustomerName;
 
           const isAllEmpty = [khNo,L,R,T,workerName].every(v => v === null || v === undefined || String(v).trim() === "");
           if (isAllEmpty) continue;
@@ -877,4 +883,5 @@
   </script>
 </body>
 </html>
+
 
